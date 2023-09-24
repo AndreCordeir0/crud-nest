@@ -20,6 +20,7 @@ export class UserController {
         return await this.userService.remove(id, request['user']);
     }
 
+    //TODO
     @Put()
     async update(@Body(new ValidationPipe({transform: true})) user:UserDto):Promise<string>{
         return null;
