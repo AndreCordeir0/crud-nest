@@ -16,6 +16,7 @@ import { AuthGuard } from './auth-guard';
     }),
   ],
   controllers: [AuthController],
+  exports:[AuthService],
   providers: [
     AuthService,
     {
