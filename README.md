@@ -3,6 +3,8 @@
 Projeto criado para teste.
 
 ## Rodar o projeto
+`npm install`
+
 `nest start --dev`
 
 # REST API
