@@ -14,7 +14,6 @@ export class AuthController {
   @Post('sign-in')
   async signIn(@Body() {email, password}): Promise<User> {
     const user = await this.userService.getByEmail(email);
-    
     return this.authService.singIn(user, password);
   }
 }
