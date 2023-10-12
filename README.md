@@ -1,73 +1,121 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Crud Nest
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Projeto criado para teste.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Rodar o projeto
+`nest start --dev`
 
-## Description
+# REST API
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Criar novo usuário
 
-## Installation
+### Requisição
 
-```bash
-$ npm install
-```
+`POST /user/`
 
-## Running the app
+    http://localhost:3000/user/
 
-```bash
-# development
-$ npm run start
+`Body`
 
-# watch mode
-$ npm run start:dev
+    {
+      "name":"nova usuario",
+      "password":"novousuario",
+      "email":"usuario@gmail.com"
+    }
 
-# production mode
-$ npm run start:prod
-```
+### Resposta
 
-## Test
 
-```bash
-# unit tests
-$ npm run test
+    {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInVzZXJOYW1lIjo"
+    }
 
-# e2e tests
-$ npm run test:e2e
+## Criar usuário com cargo
 
-# test coverage
-$ npm run test:cov
-```
+### Requisição
 
-## Support
+`POST /user/create-with-role/`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+    http://localhost:3000/user/create-with-role
 
-## Stay in touch
+`Authorization`
+  
+    Bearer token
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+`Body`
 
-## License
+    {
+      "name":"usuario user",
+      "password":"user",
+      "email":"admin@gmail.com",
+      "role":"ADMIN"
+    }
 
-Nest is [MIT licensed](LICENSE).
+### Resposta
+
+    {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInVzZXJOYW1lIjo"
+    }
+
+## Get token
+
+### Requisição
+
+`POST /auth/sign-in`
+
+    http://localhost:3000/auth/sign-in
+
+`Body`
+
+    {
+      "name":"usuario user",
+      "password":"user",
+    }
+
+### Resposta
+
+    {
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInVzZXJOYW1lIjo"
+    }
+
+## Alterar usuário
+
+### Requisição
+
+`PUT /user`
+
+    http://localhost:3000/user/
+
+`Authorization`
+  
+    Bearer token
+
+
+`Body`
+
+    {
+      "id":14,
+      "name":"usuario admin",
+      "password":"senhadiferente",
+      "email":"admin2@gmail.com"
+    }
+
+### Response
+
+    user updated
+
+## Deletar usuário
+
+### Requisição
+
+`POST /thing/`
+
+    http://localhost:3000/user/delete/:id
+
+`Authorization`
+  
+    Bearer token
+
+### Resposta
+
+    user has been removed
