@@ -1,17 +1,39 @@
-export class UserRolesEnum{
-    static readonly USER  =  {id:2, rolesPermissions:[]} ;
-    static readonly ADMIN  = {id:1, rolesPermissions:[UserRolesEnum.USER]};
-    static readonly OWNER  = {id:3, rolesPermissions:[UserRolesEnum.USER,UserRolesEnum.ADMIN]};
+export enum UserRolesEnum{
+    ADMIN  = 1,
+    USER  =  2,
+    OWNER  = 3
+}
 
-
-    static findEnum(id){
+export class UserRoleUtils{
+    static permissions(userRole:UserRolesEnum):UserRolesEnum[]{
+        switch(userRole){
+            case UserRolesEnum.ADMIN:
+                return [UserRolesEnum.USER];
+            case UserRolesEnum.OWNER:
+                return [UserRolesEnum.USER,UserRolesEnum.ADMIN];
+            default:
+                return [];
+        }
+    }
+    static findEnum(id): UserRolesEnum{
         switch(id){
-            case UserRolesEnum.USER.id:
+            case UserRolesEnum.USER:
                 return UserRolesEnum.USER;
-            case UserRolesEnum.ADMIN.id:
+            case UserRolesEnum.ADMIN:
                 return UserRolesEnum.ADMIN;
-            case UserRolesEnum.OWNER.id:
+            case UserRolesEnum.OWNER:
                 return UserRolesEnum.OWNER;
         }
     }
+    static findEnumByString(enumString: string): UserRolesEnum{
+        switch(enumString){
+            case 'USER':
+                return UserRolesEnum.USER;
+            case 'ADMIN':
+                return UserRolesEnum.ADMIN;
+            case 'OWNER':
+                return UserRolesEnum.OWNER;
+        }
+    }
+
 }

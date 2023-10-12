@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
-import { User } from "../entitie/user";
 import { RoleDto } from "src/models/roles/dtos/role-dto";
+import { User } from "../entitie/user";
 
 export class UserDto{
 
@@ -17,6 +17,8 @@ export class UserDto{
   
     roles:RoleDto[];
 
+    role: string;
+
     constructor(init?:Partial<User>){
       if(init){
         this.id = init.id;
@@ -27,5 +29,11 @@ export class UserDto{
           this.roles = init.roles.map(role=>new RoleDto(role));
         }
       }
+    }
+    getRole(){
+      if(this.roles?.length){
+        return this.roles[0]
+      }
+      return null;
     }
 }

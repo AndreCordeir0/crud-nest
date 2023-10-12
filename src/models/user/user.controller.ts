@@ -22,7 +22,12 @@ export class UserController {
 
     //TODO
     @Put()
-    async update(@Body(new ValidationPipe({transform: true})) user:UserDto):Promise<string>{
-        return null;
+    async update(@Req() request: Request, @Body(new ValidationPipe({transform: true})) user:UserDto):Promise<string>{
+        return await this.userService.alter(user,request['user']);
+    }
+
+    @Post('create-with-role')
+    async createUserWithRole(@Req() request: Request,@Body(new ValidationPipe({transform: true})) user:UserDto):Promise<string>{
+        return await this.userService.createUserWithRole(user, new UserDto(request['user']));
     }
 }

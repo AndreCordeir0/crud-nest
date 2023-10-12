@@ -7,7 +7,7 @@ import { User } from 'src/models/user/entitie/user';
 import { UserRepository } from 'src/models/user/user-repository';
 import { DataSource, Repository } from 'typeorm';
 import { Role } from '../roles/entitie/role';
-import { UserRolesEnum } from '../user_roles/user-roles.enum';
+import { UserRoleUtils, UserRolesEnum } from '../user_roles/user-roles.enum';
 
 @Injectable()
 export class UserService {
@@ -19,13 +19,46 @@ export class UserService {
         @InjectRepository(Role)private roleRepository:Repository<Role>,
         @InjectDataSource() private dataSource: DataSource
     ){}
+
+    /**
+     * 
+     * @param email email do usuario
+     * @returns retorna o usuario com o email especificado
+     */
     async getByEmail(email:string): Promise<User> {
         const user = await this.userRepository.findByEmail(email);
         return user;
     }
 
-
+    /**
+     * 
+     * @param userDto Objeto com informações do usuario
+     * @returns retorna o token de autenticação
+     */
     async create(userDto:UserDto): Promise<string> {
+        this.validateUser(userDto);
+        this.saveUser(userDto);
+        return await this.authService.generateToken(userDto);
+    }
+    async createUserWithRole(userDto:UserDto, userReq:UserDto): Promise<string> {
+        this.validateUser(userDto);
+        this.validatePermissions(userReq, userDto);
+        this.saveUser(userDto, UserRoleUtils.findEnumByString(userDto.role));
+        return await this.authService.generateToken(userDto);
+    }
+    async saveUser(userDto:UserDto, roleId:number = UserRolesEnum.USER):Promise<UserDto>{
+        userDto.password = HashUtils.hashPassword(userDto.password);
+        //Transação necessaria para não haver inconsistencia de dados
+        await this.dataSource.transaction(async () => {
+            const user = new User(userDto);
+            const role = await this.roleRepository.findOneBy({id:roleId});
+            user.roles = [role];
+            await this.userRepository.save(user);
+            userDto = new UserDto(user);
+        });
+        return userDto;
+    }
+    async validateUser(userDto): Promise<void>{
         if(!userDto || userDto.id){
             throw new HttpException('invalid user', HttpStatus.BAD_REQUEST);
         }
@@ -33,21 +66,23 @@ export class UserService {
         if(user){
             throw new HttpException('user already exists', HttpStatus.BAD_REQUEST);
         }
-        userDto.password = HashUtils.hashPassword(userDto.password);
-        //Transação necessaria para não haver inconsistencia de dados
-        await this.dataSource.transaction(async () => {
-            const user = new User(userDto);
-            const role = await this.roleRepository.findOneBy({id:UserRolesEnum.USER.id});
-            user.roles = [role];
-            await this.userRepository.save(user);
-            userDto = new UserDto(user);
-            return userDto;
-        });
-        console.log(userDto);
-        
-        return await this.authService.generateToken(userDto);
     }
-
+    /**
+     * 
+     * @param userDto 
+     * @param userReq 
+     * @returns 
+     */
+    async alter(userDto: UserDto, userReq: UserDto):Promise<string>{
+        // O usuario só pode alterar ele mesmo
+        if(userDto.id !== userReq.id){
+            throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);
+        }
+        const userAlter = new User(userDto);
+        userAlter.password = HashUtils.hashPassword(userAlter.password);
+        await this.userRepository.update(userDto.id,userAlter);
+        return 'user updated';
+    }
     /**
      * Deleta o usuario especificado se o usuario da requisição
      * tiver mais permição que o usuario a ser deletado {@see UserRolesEnum}
@@ -63,15 +98,22 @@ export class UserService {
 
         //Usuario a ser deletado
         const userDelRoleId = userDel?.roles[0]?.id;
-        const userDelRole = UserRolesEnum.findEnum(userDelRoleId);
+        const userDelRole = UserRoleUtils.findEnum(userDelRoleId);
 
         //Usuario que fez a requisição
         const userReqRoleId = userReq?.roles[0]?.id;
-        const userReqRole = UserRolesEnum.findEnum(userReqRoleId);
-
-        if(userReqRole.rolesPermissions.includes(userDelRole)){
+        const userReqRole = UserRoleUtils.findEnum(userReqRoleId); 
+        if(UserRoleUtils.permissions(userReqRole).includes(userDelRole)){
             await this.userRepository.remove(userDel);
             return 'user has been removed';
+        }else{
+            throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);
+        }
+    }
+
+    validatePermissions(userReq: UserDto, user:UserDto):boolean{
+        if(UserRoleUtils.permissions(userReq.getRole().id).includes(UserRoleUtils.findEnumByString(user.role))){
+            return true;
         }else{
             throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);
         }
