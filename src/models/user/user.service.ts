@@ -19,22 +19,11 @@ export class UserService {
         @InjectRepository(Role)private roleRepository:Repository<Role>,
         @InjectDataSource() private dataSource: DataSource
     ){}
-
-    /**
-     * 
-     * @param email email do usuario
-     * @returns retorna o usuario com o email especificado
-     */
     async getByEmail(email:string): Promise<User> {
         const user = await this.userRepository.findByEmail(email);
         return user;
     }
 
-    /**
-     * 
-     * @param userDto Objeto com informações do usuario
-     * @returns retorna o token de autenticação
-     */
     async create(userDto:UserDto): Promise<string> {
         this.validateUser(userDto);
         this.saveUser(userDto);
@@ -47,7 +36,7 @@ export class UserService {
         this.saveUser(userDto, UserRoleUtils.findEnumByString(userDto.role));
         return await this.authService.generateToken(userDto);
     }
-    
+
     async saveUser(userDto:UserDto, roleId:number = UserRolesEnum.USER):Promise<UserDto>{
         userDto.password = HashUtils.hashPassword(userDto.password);
         //Transação necessaria para não haver inconsistencia de dados
@@ -88,7 +77,7 @@ export class UserService {
 
     /**
      * Deleta o usuario especificado se o usuario da requisição
-     * tiver mais permição que o usuario a ser deletado {@see UserRolesEnum}
+     * tiver mais permissão que o usuario a ser deletado {@see UserRolesEnum}
      * @param id id do user a ser removido
      * @param userReq usuario que fez a requisição
      * @returns
