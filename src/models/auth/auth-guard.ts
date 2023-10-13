@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { HttpUtils } from 'src/common/utils/http-utils';
 import { IS_PUBLIC_KEY } from 'src/decorators/public-decorator';
 import { jwtConstants } from './constant';
+import { IS_ADMIN_KEY } from 'src/decorators/admin-decorator';
+import { UserRolesEnum } from '../user_roles/user-roles.enum';
 @Injectable()
 export class AuthGuard implements CanActivate{
 
@@ -11,14 +13,9 @@ export class AuthGuard implements CanActivate{
     }
 
     async canActivate(context: ExecutionContext):Promise<boolean>{
-        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-        if (isPublic) {
+        if (this.hasDecorator(context, IS_PUBLIC_KEY)) {
             return true;
         }
-
         const request = context.switchToHttp().getRequest<Request>();
         const token = HttpUtils.extractTokenFromHeader(request);
         if(!token){
@@ -31,10 +28,27 @@ export class AuthGuard implements CanActivate{
                   secret: jwtConstants.secret
                 }
             )
+            if (this.hasDecorator(context, IS_ADMIN_KEY)) {
+                if(payload.roles[0].id == UserRolesEnum.USER){
+                    throw new UnauthorizedException('invalid token');
+                }
+            }
             request['user'] = payload;
         }catch(err){
             throw new UnauthorizedException('invalid token');
         }
         return true;
     }
+
+    hasDecorator(context: ExecutionContext, token: string): boolean{
+        const hasToken = this.reflector.getAllAndOverride<boolean>(token, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (hasToken) {
+            return true;
+        }
+    }
 }
+
+    

@@ -3,6 +3,7 @@ import { UserDto } from './dtos/user-dto';
 import { UserService } from './user.service';
 import { Public } from 'src/decorators/public-decorator';
 import { Request } from 'express';
+import { Admin } from 'src/decorators/admin-decorator';
 
 @Controller('user')
 export class UserController {
@@ -15,15 +16,15 @@ export class UserController {
         return await this.userService.create(user);
     }
 
+    @Admin()
     @Delete('delete/:id')
     async findAll(@Req() request: Request, @Param("id") id:number){
         return await this.userService.remove(id, request['user']);
     }
 
-    //TODO
     @Put()
     async update(@Req() request: Request, @Body(new ValidationPipe({transform: true})) user:UserDto):Promise<string>{
-        return await this.userService.alter(user,request['user']);
+        return await this.userService.update(user,request['user']);
     }
 
     @Post('create-with-role')
