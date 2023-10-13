@@ -40,12 +40,14 @@ export class UserService {
         this.saveUser(userDto);
         return await this.authService.generateToken(userDto);
     }
+
     async createUserWithRole(userDto:UserDto, userReq:UserDto): Promise<string> {
         this.validateUser(userDto);
-        this.validatePermissions(userReq, userDto);
+        this.validatePermissions(userReq, userDto.role);
         this.saveUser(userDto, UserRoleUtils.findEnumByString(userDto.role));
         return await this.authService.generateToken(userDto);
     }
+    
     async saveUser(userDto:UserDto, roleId:number = UserRolesEnum.USER):Promise<UserDto>{
         userDto.password = HashUtils.hashPassword(userDto.password);
         //Transação necessaria para não haver inconsistencia de dados
@@ -68,12 +70,12 @@ export class UserService {
         }
     }
     /**
-     * 
-     * @param userDto 
-     * @param userReq 
+     * Altera apenas o proprio usuário da requisição
+     * @param userDto informações do usuario a ser atualizado
+     * @param userReq usuário que realizou a requisição
      * @returns 
      */
-    async alter(userDto: UserDto, userReq: UserDto):Promise<string>{
+    async update(userDto: UserDto, userReq: UserDto):Promise<string>{
         // O usuario só pode alterar ele mesmo
         if(userDto.id !== userReq.id){
             throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);
@@ -83,6 +85,7 @@ export class UserService {
         await this.userRepository.update(userDto.id,userAlter);
         return 'user updated';
     }
+
     /**
      * Deleta o usuario especificado se o usuario da requisição
      * tiver mais permição que o usuario a ser deletado {@see UserRolesEnum}
@@ -111,8 +114,8 @@ export class UserService {
         }
     }
 
-    validatePermissions(userReq: UserDto, user:UserDto):boolean{
-        if(UserRoleUtils.permissions(userReq.getRole().id).includes(UserRoleUtils.findEnumByString(user.role))){
+    validatePermissions(userReq: UserDto, role:string):boolean{
+        if(UserRoleUtils.permissions(userReq.getRole().id).includes(UserRoleUtils.findEnumByString(role))){
             return true;
         }else{
             throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);

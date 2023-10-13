@@ -8,6 +8,12 @@ export class AuthService {
     constructor(private jwtService:JwtService) {
         
     }
+    /**
+     * Retorna a senha se a senha for valida
+     * @param user recebe o usuário recuperado da base
+     * @param password recebe a senha digitado pelo usuário
+     * @returns retorna o token JWT
+     */
     async singIn(user:User, password:string):Promise<any>{
         if(!user || !password){
             throw new HttpException('invalid credentials', 401);

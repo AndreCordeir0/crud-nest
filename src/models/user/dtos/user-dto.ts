@@ -17,6 +17,7 @@ export class UserDto{
   
     roles:RoleDto[];
 
+    //Role quando vindo da requisição
     role: string;
 
     constructor(init?:Partial<User>){
