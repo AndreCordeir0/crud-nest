@@ -18,5 +18,11 @@ export class UserRepository extends Repository<User>{
         .printSql()
         .getOne();
     }
-    
+    async findAll():Promise<User[]>{
+        return this.dataSource
+        .getRepository(User)
+        .createQueryBuilder("user")
+        .printSql()
+        .getMany();
+    }
 }

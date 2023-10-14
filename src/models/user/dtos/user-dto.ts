@@ -31,6 +31,9 @@ export class UserDto{
         }
       }
     }
+    static toDto(init?:Partial<User>){
+      return new UserDto({name:init.name, email:init.email});
+    }
     getRole(){
       if(this.roles?.length){
         return this.roles[0]

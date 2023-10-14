@@ -1,4 +1,4 @@
-import { Body, Controller, Post, ValidationPipe, Delete, Req, Param, Put } from '@nestjs/common';
+import { Body, Controller, Post, ValidationPipe, Delete, Req, Param, Put, Get } from '@nestjs/common';
 import { UserDto } from './dtos/user-dto';
 import { UserService } from './user.service';
 import { Public } from 'src/decorators/public-decorator';
@@ -14,6 +14,12 @@ export class UserController {
     @Post()
     async createUser(@Body(new ValidationPipe({transform: true})) user:UserDto):Promise<string>{
         return await this.userService.create(user);
+    }
+    
+    @Admin()
+    @Get('get-all')
+    async getAll(){
+        return await this.userService.getAll();
     }
 
     @Admin()

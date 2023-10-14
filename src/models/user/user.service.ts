@@ -19,6 +19,14 @@ export class UserService {
         @InjectRepository(Role)private roleRepository:Repository<Role>,
         @InjectDataSource() private dataSource: DataSource
     ){}
+
+    async getAll():Promise<UserDto[]>{
+        const users = await this.userRepository.findAll();
+        if(!users?.length){
+            throw new HttpException('users not found', HttpStatus.NOT_FOUND);
+        }
+        return users.map(u=>UserDto.toDto(u));;
+    }
     async getByEmail(email:string): Promise<User> {
         const user = await this.userRepository.findByEmail(email);
         return user;
